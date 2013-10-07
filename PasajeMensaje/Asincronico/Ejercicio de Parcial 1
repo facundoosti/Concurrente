@@ -1,0 +1,75 @@
+Ejercicio de Parcial: 1era Fecha 29/11/2010
+
+Problema:
+Procesos Alumnos N, un ayudante y un profesor; los alumnos hacen preguntas que 
+pueden ser teoricas o practicas, las preguntas osn atendidas en el orden de llegada, 
+el ayudante contesta solo preguntas practicas y el profesor ambas dando prioridad
+a las teoricas.
+
+#Variables;
+
+	chan pregTeoricas(consulta, alumnoId);
+	chan pregPracticas(consulta, alumnoId);
+	chan atenderPracticas(encargado);
+	chan respPracticas["Ayudante"|"Profesor"](respuesta);
+	chan respAlunmno[1..N](respuesta); 
+	
+
+
+#Algoritmo;
+
+	Precess Alumno[i=1..N]{
+		While (true){		
+			consulta = new Consulta(); /*crea un Objeto consulta con dos atributos, la consulta, y el tipo de consulta (teorica o practica)*/
+		
+			if (consulta.getTipo() == "Teorica"){
+				send pregTeoricas(consulta, i);
+			}else{
+				send pregPracticas(consulta, i);
+			}
+		
+			respuesta=new Respuesta();
+		
+			recive respAlumno[i](respuesta);
+
+		}	
+
+	}
+
+	Precess Ayudante{
+		
+		While (true){
+			
+			send atenderPracticas("Ayudante");
+			recive respPracticas["Ayudante"](consulta, almunoId);
+			respuesta = new Respuesta(consulta);
+			send respAlumno[alumnoId](respuesta);
+
+		}	
+	}
+
+
+
+	Precess Profesor{
+		While (true){
+			if (empty(pregTeoricas())){
+				send atenderPracticas("Profesor");
+				recive respPracticas["Profesor"](consulta, almunoId);
+				respuesta = new Respuesta(consulta);
+				send respAlumno[alumnoId](respuesta);
+
+			}else{
+				recive pregTeoricas(consulta, almunoId);
+				respuesta = new Respuesta(consulta);
+				send respAlumno[alumnoId](respuesta);
+			}
+		}	
+	}
+	
+	Precess Buffer{
+		if(!empty(atenderPracticas()) and (!empty(pregPracticas()))){
+    		recive atenderPracticas(encargado);
+    		recive pregPracticas(consulta, i);
+    		send respPracticas[encargado](consulta, i);
+    	}
+	}

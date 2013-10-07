@@ -1,0 +1,89 @@
+process persona[i: 1..n]{
+    string estado;
+
+    Banco.llego(i);
+    Timer[i].iniciar();
+    Estado[i].dormir();
+
+    Estado[i].getEstado(estado);
+    if (estado != 'portimer'){
+        //hacer lo que tenga que hacer
+    }
+}
+
+process timer[i: 1..n]{
+    Timer[i].iniciar2();
+    sleep(15); //15 minutos
+    Estado[i].setEstadoPorTimer(); 
+}
+
+process empleado[i: 1..2]{
+    int idPersona, string estado;
+    while(true){
+        Banco.damePersona(idPersona);
+        Estado[idPersona].setEstadoEmpleado(estado);
+        if (estado == 'porempleado'){
+            //loatiende
+        }
+    }
+}
+
+monitor Banco {
+    
+    queue personas;
+    cond esperar;
+
+    procedure llego(i){
+        personas.push(i);
+        signal(esperar); // Despierta al empleado en caso de que el empleado haya llegado primero por damePersona
+    }
+
+    procedure damePersona(out idPersona){
+        if (personas.empty()){
+            wait(esperar);
+        }
+        idPersona = personas.pop();
+    }
+}
+
+monitor Timer[i:1..n] {
+    boolean empezar = false;
+    cond esperar;
+    procedure iniciar(){
+        empezar = true;
+        signal(esperar);
+    }
+
+    procedure iniciar2(){
+        if (!(empezar)){
+            wait(esperar);
+        }
+    }
+}
+
+monitor Estado[i: 1..n]{
+    
+    cond esperar;
+    string estado = 'normal';
+
+    procedure dormir(){
+        wait(esperar);
+    }
+
+    procedure getEstado(out outEstado){
+        outEstado = estado;
+    }
+
+    procedure setEstadoPorTimer(){
+        if (estado == 'normal'){
+            estado = 'portimer';
+        }     
+    }
+
+    procedure setEstadoEmpleado(out outEstado){
+        if (estado == 'normal'){
+            estado = 'porempleado';
+        }
+        outEstado = estado;
+    }
+}

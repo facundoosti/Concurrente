@@ -1,0 +1,72 @@
+process Alumno[i:1..50]{
+    
+    int grupo;
+    int orden;
+    
+    Comision.llegue();
+    Jtp.darNroGrupo(grupo);
+    Comision.buscarCompañero(grupo);
+    this.realizarTarea();
+    Jtp.darOrden(orden, grupo); //Avisa termino de realizacion de Trabajo y recibe el orden de Finalizacion
+}
+
+Monitor Jtp {
+
+    int order = 0;
+    cond[] alumnos[1..25]; 
+    int[] cantGrupo[1..25]=0;
+
+    Procedure darNroGrupo(OUT int nro){
+        nro = darNro();
+    }
+    
+
+    Procedure darOrden(OUT int orden,IN int grupo){
+
+        int nroGrupo = grupo;
+        if (cantGrupo[nroGrupo] == 1) {
+            signal(alumnos[nroGrupo]);
+            
+        }else{
+            orden ++;
+            cantGrupo[nroGrupo]++;
+            wait(alumnos[nroGrupo]);
+        }
+        orden;
+        
+    }
+}
+
+
+Monitor Comision {
+
+    int cant = O;
+    cond alumno;
+    cond[] esperarCompañero[1..25];
+    int[] cantGrupo[1..25]=0;
+
+    Procedure llegue(){
+        cant++;
+        if (cant == 50){
+            signalAll(alumno);
+        }
+        else{
+            wait(alumno);
+        }
+    }
+
+    Procedure buscarCompañero(IN int grupo){
+       int nroGrupo= grupo;
+       if (cantGrupo[nroGrupo] == 1 ) {
+            signal(esperarCompañero[nroGrupo]);
+        } 
+        else{
+            cantGrupo[nroGrupo]++;
+            wait(esperarCompañero[nroGrupo]);
+
+        }    
+    }
+
+
+
+}
