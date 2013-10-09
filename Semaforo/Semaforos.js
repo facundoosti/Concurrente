@@ -69,6 +69,58 @@ Process Consumidor [i=1..C]{
 } 
 
 4)
+/*Variables*/
+
+sem mutex_cant = 1;
+sem esperando = 1;
+sem cola = 1;
+sem profe_esperando = 0;
+sem[] esperando[1..50] = 0;
+[] nota_alumno[1..50] = 0;
+int cant;
+
+/*Algoritmo*/
+
+Process Alumno[i:1..50]{
+	int job=elegir();
+	P(mutex_cant); //barrera
+	cant++;
+	if (cant = 50 ) {
+		V(mutex_cant);
+		for j:1 to 49 do{
+			V(esperando);
+		}
+	else
+		V(mutex_cant);
+		P(esperando);
+	}
+	realizar_tarea();
+	P(cola);
+	c.push(i, job);
+	V(cola);
+	V(profe_esperando);
+	P(esperando[i]);
+}
+
+Process Profesor{	
+	int nota = 10;
+	queue[] tareas_terminadas[1..10];
+	loop{
+		P(profe_esperando);
+		P(cola);
+		int alu, tarea = c.pop(i, job);
+		V(cola);
+		tareas_terminadas[tarea].push(alu);
+		if tareas_terminadas[tarea].size() == 5{
+			for each tareas_terminadas[tarea] do { //Para cada elemento de la cola
+				int alumno=tareas_terminadas[tarea].pop()
+				nota_alumno[alumno] = nota;
+				V(esperando[alumno]);
+			}
+			nota--;
+		}
+	}
+}
 
 5)
 /*Variables*/
