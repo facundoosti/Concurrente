@@ -125,36 +125,7 @@ Process Profesor{
 }
 
 
-/*Variables*/
 
-
-
-/*Algoritmo*/
-
-Process Profesor{
-	P(esperar);
-	
-} 
-
-Process Alumno [i=1..50]{
-	int tarea = elegir();
-	P(muetex_cant);
-	cant++;
-	if cant = 50 {
-		V(muetex_cant);
-		for j=1 to 49 do{
-			V(esperando[j]);
-		}
-	else
-		V(muetex_cant);
-		P(esperando[i]);
-	}
-	realizar_tarea();
-	P(cola);
-	cola.push(i, tarea);
-	V(cola);
-	V(esperar);
-} 
 
 5)
 /*Variables*/
