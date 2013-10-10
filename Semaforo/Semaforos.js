@@ -124,9 +124,6 @@ Process Profesor{
 	}
 }
 
-
-
-
 5)
 /*Variables*/
 
@@ -139,7 +136,7 @@ sem llegaAlumno:=0;
 sem scantAlu:=1;
 sem esperaCorrecion[1..n]:=1;
 sem sEstado[1..n]:=1;
-sem sReloj[1,,n]:=1;
+sem sReloj[1..n]:=1;
 
 /*Algoritmo*/
 
@@ -195,10 +192,53 @@ Process Reloj[r:=1..n]{
 	V(sEstado[r]);	
 }
 
+6)
+/*Variables*/
+
+int nro_grupo = 0;
+int cant = 0;
+
+/*Algoritmo*/
+M=NroTareas x 5
+Process Operarios[i:=1..M]{	
+	P(mutex_cant);
+	cant++;	
+	int grupo = nro_grupo;	
+	if cant == 5{
+		cant = 0;
+		nro_grupo++;
+		grupos[grupo] = c;
+		P(mutex_cant);
+		for each c do {
+			int operario = grupos[grupo].pop();
+			V(esperando[operario]);
+		}
+		P(mutex_tarea);
+		tarea[grupo] = tarea++;
+		V(mutex_tarea);
+	else{
+		operario_grupo[i]=grupo;
+		c.push(i);
+		V(mutex_cant);
+		P(esperando[i]);
+	}
+	P(mutex_elem);
+	while elemetos[operario_grupo[i]] < X {
+		elemetos[operario_grupo[i]]++;
+		V(mutex_elem);
+		hacerElemento();
+	}
+
+
+
+}
+
+
+
 7)
 /*Variables*/
 
-es_primero = true;
+boolean es_primero = true;
 sem mutex = 1;
 sem cola  = 1;
 sem[] estado[1..n] = 1;
