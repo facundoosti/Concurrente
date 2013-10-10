@@ -195,8 +195,15 @@ Process Reloj[r:=1..n]{
 6)
 /*Variables*/
 
+sem mutex_cant = 1;
+sem mutex_elem = 1;
+sem mutex_tarea= 1;
+sem[] mutex_cant[] = 1;
+sem[] esperando[] = 0;
 int nro_grupo = 0;
 int cant = 0;
+int[][] grupo[1..nro_grupo][1..5] = 0; // trata el arreglo de operarios como una cola
+int[] cant[]=0;
 
 /*Algoritmo*/
 M=NroTareas x 5
@@ -210,8 +217,7 @@ Process Operarios[i:=1..M]{
 		grupos[grupo] = c;
 		P(mutex_cant);
 		for each c do {
-			int operario = grupos[grupo].pop();
-			V(esperando[operario]);
+			V(esperando[grupos[grupo].pop()]);
 		}
 		P(mutex_tarea);
 		tarea[grupo] = tarea++;
@@ -228,6 +234,19 @@ Process Operarios[i:=1..M]{
 		V(mutex_elem);
 		hacerElemento();
 	}
+	P(mutex_cant[grupo]);
+	cant[grupo]++;
+	if cant[grupo] == 5{
+		V(mutex_cant[grupo]);
+		for j = 1 to 4 do {
+			V(esperando[grupos[grupo].pop()]);
+		}
+	
+	else
+
+	}
+
+
 
 
 
