@@ -24,6 +24,44 @@ pasan a competir por entrar nuevamente al Monitor, sin embargo la nueva reescrit
 si respeta el orden de llegada.
 
 2)
+Process persona[i: 1..n]{
+    loop{
+        int prioridad = getPrioridad();
+        Maquina.permiso_de_uso(i, prioridad);
+        //Usando Maquina;
+        Maquina.terminar(i, prioridad);
+    }
+}
+
+Monitor Maquina{
+    var 
+
+    boolean estado = false;
+    queue[] prioridades[1..100] = queue c.new();
+    cond[] dormir[1..100];
+    int personas_esperando = 0;
+
+    Procedure permiso_de_uso(int persona, int prioridad){
+        if not estado then{
+            estado = true;
+        else{
+            prioridades[prioridad].push(persona);
+            personas_esperando++;
+            wait(dormir[persona]);
+            estado =true;    
+        }
+    }
+
+    Procedure terminar(int persona, int prioridad){
+        prioridades[prioridad].pop(persona);
+        estado = false;
+        if personas_esperando > 0 then{
+            int otra_persona = perioridades.detect { |cola| not cola.empty()}.pop();
+            personas_esperando--;
+            signal(dormira[otra_persona]);
+        }
+    }
+}
 
 3)
 process persona[i: 1..n]{
